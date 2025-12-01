@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card mt-5">
+      <div class="card-header bg-info text-white">
+        <h3>Register as Teacher</h3>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit" class="btn btn-info w-100">Register as Teacher</button>
+        </form>
+        <hr>
+        <p class="text-center"><a href="{% url 'login' %}">Back to Login</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

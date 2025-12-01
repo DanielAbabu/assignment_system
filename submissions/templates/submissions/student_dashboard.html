@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>All Assignments</h2>
+
+{% if assignments %}
+<div class="row">
+    {% for assignment in assignments %}
+    <div class="col-md-6 mb-4">
+        <div class="card {% if assignment.is_expired %}border-danger{% endif %}">
+            <div class="card-header">
+                <strong>{{ assignment.title }}</strong> 
+                by {{ assignment.teacher.name }}
+            </div>
+            <div class="card-body">
+                <p>{{ assignment.description|truncatewords:30 }}</p>
+                <p><strong>Deadline:</strong> {{ assignment.deadline|date:"M d, Y H:i" }}</p>
+                <p><strong>Status:</strong>
+                    {% if assignment.is_expired %}
+                    <span class="badge bg-danger">Expired</span>
+                    {% else %}
+                    <span class="badge bg-success">Open</span>
+                    {% endif %}
+                </p>
+
+                {% if assignment.id in submitted_ids %}
+                    <a href="{% url 'submit_assignment' assignment.pk %}" class="btn btn-warning btn-sm">Re-submit</a>
+                    <span class="badge bg-success ms-2">Submitted</span>
+                {% else %}
+                    <a href="{% url 'submit_assignment' assignment.pk %}" class="btn btn-primary btn-sm">Submit Now</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">No assignments available yet.</div>
+{% endif %}
+{% endblock %}

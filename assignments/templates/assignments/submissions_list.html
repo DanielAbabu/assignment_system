@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Submissions for: {{ assignment.title }}</h2>
+    <a href="{% url 'teacher_dashboard' %}" class="btn btn-secondary">← Back</a>
+</div>
+
+{% if submissions %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Student</th>
+            <th>Submitted At</th>
+            <th>File</th>
+            <th>Grade</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sub in submissions %}
+        <tr>
+            <td>{{ sub.student.name }} ({{ sub.student.email }})</td>
+            <td>{{ sub.submitted_at|date:"M d, Y H:i" }}</td>
+            <td>{{ sub.filename }}</td>
+            <td>{{ sub.grade|default:"Not graded" }}</td>
+            <td>
+                <a href="{% url 'download_submission' sub.id %}" class="btn btn-sm btn-primary">Download</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="alert alert-warning">No submissions yet.</div>
+{% endif %}
+{% endblock %}

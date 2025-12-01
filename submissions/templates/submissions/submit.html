@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Submit Assignment: {{ assignment.title }}</h2>
+
+<div class="card">
+    <div class="card-body">
+        <p><strong>Description:</strong> {{ assignment.description }}</p>
+        <p><strong>Deadline:</strong> {{ assignment.deadline|date:"M d, Y H:i" }}</p>
+        <p><strong>Allowed files:</strong> {{ assignment.allowed_extensions }}</p>
+
+        {% if existing %}
+        <div class="alert alert-info">
+            You already submitted: <strong>{{ existing.filename }}</strong> on {{ existing.submitted_at|date:"M d, Y H:i" }}
+        </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label>Upload your file (max 10MB):</label>
+                <input type="file" name="file" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-success">Submit / Re-submit</button>
+            <a href="{% url 'student_dashboard' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
