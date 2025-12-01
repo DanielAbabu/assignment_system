@@ -46,3 +46,12 @@ def dashboard(request):
     if request.user.role == 'teacher':
         return redirect('teacher_dashboard')
     return redirect('student_dashboard')
+
+
+def students_list(request):
+    """List all students — only accessible to teachers."""
+    if not request.user.is_authenticated or request.user.role != 'teacher':
+        return redirect('login')
+    from .models import User
+    students = User.objects.filter(role='student').order_by('name')
+    return render(request, 'users/students_list.html', {'students': students})

@@ -12,7 +12,7 @@
             <th>Student</th>
             <th>Submitted At</th>
             <th>File</th>
-            <th>Grade</th>
+            <th style="width:160px">Grade</th>
             <th>Action</th>
         </tr>
     </thead>
@@ -22,7 +22,19 @@
             <td>{{ sub.student.name }} ({{ sub.student.email }})</td>
             <td>{{ sub.submitted_at|date:"M d, Y H:i" }}</td>
             <td>{{ sub.filename }}</td>
-            <td>{{ sub.grade|default:"Not graded" }}</td>
+            <td>
+                <form method="post" action="{% url 'grade_submission' sub.id %}" class="d-flex align-items-center">
+                    {% csrf_token %}
+                    <input name="grade" type="text" value="{{ sub.grade }}" placeholder="e.g. A, 95" class="form-control form-control-sm me-2" />
+                    <button class="btn btn-sm btn-success me-2" type="submit">Save</button>
+                    {% if sub.grade %}
+                        {% load grade_extras %}
+                        <span class="badge bg-{{ sub.grade|grade_badge_class }}">{{ sub.grade|grade_display }}</span>
+                    {% else %}
+                        <span class="text-muted small">Not graded</span>
+                    {% endif %}
+                </form>
+            </td>
             <td>
                 <a href="{% url 'download_submission' sub.id %}" class="btn btn-sm btn-primary">Download</a>
             </td>

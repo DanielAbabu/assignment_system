@@ -2,6 +2,39 @@
 {% block content %}
 <h2>All Assignments</h2>
 
+<div class="mb-4">
+    <h4>My Submissions</h4>
+    {% if my_submissions %}
+    <div class="list-group mb-3">
+        {% for sub in my_submissions %}
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ sub.assignment.title }}</strong>
+                <div><small>Submitted: {{ sub.submitted_at|date:"M d, Y H:i" }}</small></div>
+                <div>
+                    <small>Grade: 
+                        {% load grade_extras %}
+                        {% if sub.grade %}
+                            <span class="badge bg-{{ sub.grade|grade_badge_class }}">{{ sub.grade|grade_display }}</span>
+                        {% else %}
+                            <span class="text-muted">Not graded</span>
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+            <div>
+                {% if sub.file %}
+                <a href="{{ sub.file.url }}" class="btn btn-sm btn-outline-primary" target="_blank">Download</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-secondary">You have not submitted any assignments yet.</div>
+    {% endif %}
+</div>
+
 {% if assignments %}
 <div class="row">
     {% for assignment in assignments %}
