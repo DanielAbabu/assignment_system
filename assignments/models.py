@@ -4,6 +4,7 @@ from django.utils import timezone
 
 class Assignment(models.Model):
     teacher = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': 'teacher'})
+    students = models.ManyToManyField(User, blank=True, related_name='assignments', limit_choices_to={'role': 'student'})
     title = models.CharField(max_length=200)
     description = models.TextField()
     deadline = models.DateTimeField()

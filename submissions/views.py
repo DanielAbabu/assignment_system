@@ -7,13 +7,17 @@ from assignments.models import Assignment
 from .models import Submission
 import os
 from logs.models import AuditLog
+from django.http import JsonResponse
+from django.utils import timezone
+from django.db.models import Q
 
 @login_required
 def student_dashboard(request):
     if request.user.role != 'student':
         return HttpResponseForbidden("Access denied.")
 
-    all_assignments = Assignment.objects.all().order_by('-created_at')
+    # Show assignments assigned to this student OR assignments with no explicit student list
+    all_assignments = Assignment.objects.filter(Q(students=request.user) | Q(students__isnull=True)).distinct().order_by('-created_at')
     my_submissions = Submission.objects.filter(student=request.user)
     submitted_assignment_ids = my_submissions.values_list('assignment_id', flat=True)
 
@@ -22,6 +26,31 @@ def student_dashboard(request):
         'submitted_ids': submitted_assignment_ids,
         'my_submissions': my_submissions,
     })
+
+
+@login_required
+def student_assignments_json(request):
+    """Return JSON list of assignments for the logged-in student."""
+    if request.user.role != 'student':
+        return JsonResponse({'error': 'Access denied'}, status=403)
+
+    assignments = Assignment.objects.filter(Q(students=request.user) | Q(students__isnull=True)).distinct().order_by('-created_at')
+    my_submissions = Submission.objects.filter(student=request.user)
+    submitted_ids = set(my_submissions.values_list('assignment_id', flat=True))
+
+    data = []
+    for a in assignments:
+        data.append({
+            'id': a.id,
+            'title': a.title,
+            'description': a.description[:200],
+            'deadline': a.deadline.isoformat() if a.deadline else None,
+            'is_expired': a.is_expired(),
+            'teacher': a.teacher.name if a.teacher else str(a.teacher.email),
+            'submitted': a.id in submitted_ids,
+        })
+
+    return JsonResponse({'assignments': data, 'now': timezone.now().isoformat()})
 
 @login_required
 def submit_assignment(request, pk):

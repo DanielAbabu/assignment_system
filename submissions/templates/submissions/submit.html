@@ -1,28 +1,48 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Submit Assignment: {{ assignment.title }}</h2>
-
-<div class="card">
-    <div class="card-body">
-        <p><strong>Description:</strong> {{ assignment.description }}</p>
-        <p><strong>Deadline:</strong> {{ assignment.deadline|date:"M d, Y H:i" }}</p>
-        <p><strong>Allowed files:</strong> {{ assignment.allowed_extensions }}</p>
-
-        {% if existing %}
-        <div class="alert alert-info">
-            You already submitted: <strong>{{ existing.filename }}</strong> on {{ existing.submitted_at|date:"M d, Y H:i" }}
-        </div>
-        {% endif %}
-
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label>Upload your file (max 10MB):</label>
-                <input type="file" name="file" class="form-control" required>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-0">Submit: {{ assignment.title }}</h4>
+                    <small class="text-muted">by {{ assignment.teacher.name }}</small>
+                </div>
+                <div class="text-end">
+                    <small class="text-muted">Deadline: {{ assignment.deadline|date:"M d, Y H:i" }}</small>
+                    {% if assignment.is_expired %}
+                        <div><span class="badge bg-danger">Expired</span></div>
+                    {% else %}
+                        <div><span class="badge bg-success">Open</span></div>
+                    {% endif %}
+                </div>
             </div>
-            <button type="submit" class="btn btn-success">Submit / Re-submit</button>
-            <a href="{% url 'student_dashboard' %}" class="btn btn-secondary">Cancel</a>
-        </form>
+            <div class="card-body">
+                <p>{{ assignment.description }}</p>
+                <p><strong>Allowed files:</strong> {{ assignment.allowed_extensions }}</p>
+
+                {% if existing %}
+                <div class="alert alert-info">
+                    You already submitted: <strong>{{ existing.filename }}</strong>
+                    <div class="small">on {{ existing.submitted_at|date:"M d, Y H:i" }}</div>
+                </div>
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Upload your file (max 10MB)</label>
+                        <input type="file" name="file" class="form-control" required>
+                        <div class="form-text">Allowed extensions: {{ assignment.allowed_extensions }}. Resubmitting will replace your previous file.</div>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <a href="{% url 'student_dashboard' %}" class="btn btn-outline-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-success">{% if existing %}Re-submit{% else %}Submit{% endif %}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

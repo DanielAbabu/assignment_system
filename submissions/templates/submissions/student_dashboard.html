@@ -36,9 +36,9 @@
 </div>
 
 {% if assignments %}
-<div class="row">
+<div id="assignments-container" class="row">
     {% for assignment in assignments %}
-    <div class="col-md-6 mb-4">
+    <div class="col-md-6 mb-4" data-assignment-id="{{ assignment.id }}">
         <div class="card {% if assignment.is_expired %}border-danger{% endif %}">
             <div class="card-header">
                 <strong>{{ assignment.title }}</strong> 
@@ -66,6 +66,50 @@
     </div>
     {% endfor %}
 </div>
+
+<script>
+// Poll the server for new assignments every 15 seconds and prepend any new ones.
+const studentAssignmentsPoll = async () => {
+    try {
+        const resp = await fetch('{% url "student_assignments_json" %}');
+        if (!resp.ok) return;
+        const data = await resp.json();
+        const container = document.getElementById('assignments-container');
+        if (!container) return;
+        const existing = new Set(Array.from(container.querySelectorAll('[data-assignment-id]')).map(el => el.getAttribute('data-assignment-id')));
+        for (const a of data.assignments.reverse()) {
+            if (!existing.has(String(a.id))) {
+                // build card HTML (minimal)
+                const col = document.createElement('div');
+                col.className = 'col-md-6 mb-4';
+                col.setAttribute('data-assignment-id', a.id);
+                const card = `
+                <div class="card ${a.is_expired ? 'border-danger' : ''}">
+                    <div class="card-header"><strong>${a.title}</strong> by ${a.teacher}</div>
+                    <div class="card-body">
+                        <p>${a.description}</p>
+                        <p><strong>Deadline:</strong> ${a.deadline ? new Date(a.deadline).toLocaleString() : '—'}</p>
+                        <p><strong>Status:</strong> ${a.is_expired ? '<span class="badge bg-danger">Expired</span>' : '<span class="badge bg-success">Open</span>'}</p>
+                        ${a.submitted ? '<a class="btn btn-warning btn-sm" href="#">Re-submit</a><span class="badge bg-success ms-2">Submitted</span>' : `<a class="btn btn-primary btn-sm" href="/submissions/submit/${a.id}/">Submit Now</a>`}
+                    </div>
+                </div>`;
+                col.innerHTML = card;
+                // prepend to top
+                container.insertBefore(col, container.firstChild);
+            }
+        }
+    } catch (e) {
+        console.error('Assignment poll failed', e);
+    }
+};
+
+// Start polling only on this page
+if (document.getElementById('assignments-container')) {
+    // first run after 3s to allow page settle
+    setTimeout(studentAssignmentsPoll, 3000);
+    setInterval(studentAssignmentsPoll, 15000);
+}
+</script>
 {% else %}
 <div class="alert alert-info">No assignments available yet.</div>
 {% endif %}

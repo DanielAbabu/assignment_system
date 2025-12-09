@@ -8,6 +8,7 @@ from .models import Assignment
 from .forms import AssignmentForm
 from submissions.models import Submission
 from django.http import HttpResponseForbidden
+from django.views.decorators.http import require_POST
 
 @login_required
 def teacher_dashboard(request):
@@ -29,6 +30,8 @@ def create_assignment(request):
             assignment = form.save(commit=False)
             assignment.teacher = request.user
             assignment.save()
+            # Save ManyToMany relationships (students)
+            form.save_m2m()
             messages.success(request, 'Assignment created successfully!')
             return redirect('teacher_dashboard')
     else:
@@ -44,6 +47,35 @@ def view_submissions(request, pk):
         'assignment': assignment,
         'submissions': submissions
     })
+
+
+@login_required
+def edit_assignment(request, pk):
+    if request.user.role != 'teacher':
+        return HttpResponseForbidden()
+    assignment = get_object_or_404(Assignment, pk=pk, teacher=request.user)
+    if request.method == 'POST':
+        form = AssignmentForm(request.POST, instance=assignment)
+        if form.is_valid():
+            assignment = form.save()
+            form.save_m2m()
+            messages.success(request, 'Assignment updated successfully!')
+            return redirect('teacher_dashboard')
+    else:
+        form = AssignmentForm(instance=assignment)
+    return render(request, 'assignments/create.html', {'form': form, 'assignment': assignment})
+
+
+@login_required
+@require_POST
+def delete_assignment(request, pk):
+    if request.user.role != 'teacher':
+        return HttpResponseForbidden()
+    assignment = get_object_or_404(Assignment, pk=pk, teacher=request.user)
+    title = assignment.title
+    assignment.delete()
+    messages.success(request, f"Assignment '{title}' deleted.")
+    return redirect('teacher_dashboard')
 
 
 @login_required
