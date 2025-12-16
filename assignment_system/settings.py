@@ -1,15 +1,19 @@
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Use environment variables for sensitive settings. For development you can keep
 # the defaults, but in production set `DJANGO_SECRET_KEY` and `DJANGO_DEBUG`.
 SECRET_KEY = os.environ.get(
-    'DJANGO_SECRET_KEY', 'django-insecure-replace-this-in-production-1234567890'
+    'SECRET_KEY', 'django-insecure-replace-this-in-production-1234567890'
 )
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = ['*']
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -119,4 +123,12 @@ else:
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760
 MAX_UPLOAD_SIZE = 10 * 1024 * 1024
+
+# Email settings for OTP
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'your-email@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'your-app-password')
 ALLOWED_FILE_EXTENSIONS = ['.pdf', '.docx', '.zip', '.jpg', '.jpeg', '.png', '.txt']

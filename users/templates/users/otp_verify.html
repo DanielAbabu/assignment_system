@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card mt-5">
+      <div class="card-header bg-primary text-white">
+        <h3>Enter OTP</h3>
+      </div>
+      <div class="card-body">
+        <p>Check your email for the OTP code.</p>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="otp" class="form-label">OTP Code</label>
+            <input type="text" class="form-control" id="otp" name="otp" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Verify</button>
+        </form>
+        <hr>
+        <p class="text-center"><a href="{% url 'login' %}">Back to Login</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -57,7 +57,8 @@ def edit_assignment(request, pk):
     if request.method == 'POST':
         form = AssignmentForm(request.POST, instance=assignment)
         if form.is_valid():
-            assignment = form.save()
+            assignment = form.save(commit=False)
+            assignment.save()
             form.save_m2m()
             messages.success(request, 'Assignment updated successfully!')
             return redirect('teacher_dashboard')
